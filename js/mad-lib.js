@@ -7,8 +7,9 @@ var Mad = {
 	 */
 	original_article: '',
 	display_article: '',
+	final_article: '',
 	words: {},
-	completed: {},
+	num_completed: 1,
 	num_words: 0,
 	$target: null,
 	scramble_interval: null,
@@ -32,6 +33,12 @@ var Mad = {
 				});
 		}, 4400);
 
+		this.final_article = this._formStepper(this.original_article);
+		if (this.final_article.length) {
+			clearInterval(this.scramble_interval);
+			Mad.$target.html(this.final_article).animate({'opacity': 1}, 2000);
+		}
+		
 		console.log(this.words);
 	},
 
@@ -50,7 +57,6 @@ var Mad = {
 
 	 		if (typeof(this.words[word_type]) === 'undefined') {
 	 			this.words[word_type] = [null];
-				this.completed[word_type] = 0;
 	 		} else {
 	 			this.words[word_type].push(null);
 	 		}
@@ -106,10 +112,47 @@ var Mad = {
 		return article;
 	 },
 
-	_uiLaunchDialog: function() {
-
+	_formStepper: function(article) {
+		/* Walks the user through each of the words in the Mad Lib */
+	 	var start = article.indexOf('['),
+	 		end = article.indexOf(']'),
+	 		word_type;
+	 	if (start > -1 && end > -1) {
+	 		word_type = article.substr(start + 1, end - start - 1);
+	 		
+	 		var word_to_your_mother = this._uiLaunchDialog(word_type);
+	 		word_to_your_mother = (word_to_your_mother) ? word_to_your_mother : '&#91;' + word_type + '&#93;';
+			article = article.substr(0, start) + word_to_your_mother + article.substr(end + 1, article.length);
+			
+			return this._formStepper(article);
+	 	} else {
+	 		return article;
+	 	}
+	},
+	
+	_uiLaunchDialog: function(word_type) {
+		var result, a_or_an;
+		
+		/* picking the correct indefinite article for the word*/
+		if (['Adjective', 'Adverb', 'Animal'].indexOf(word_type) !== -1) {
+			a_or_an = 'an';
+		} else {
+			a_or_an = 'a';
+		}
+	
+		var result = prompt('Choose ' 
+							+ a_or_an 
+							+ " " 
+							+ word_type 
+							+ ' (' 
+							+ this.num_completed 
+							+ ' of ' 
+							+ this.num_words 
+							+ ')');
+		
+		this.num_completed += 1;
+		return result;
 	}
-
 }
 
 $('.mad-lib').each(function() {
