@@ -7,8 +7,10 @@ var Mad = {
 	 */
 	original_article: '',
 	display_article: '',
+	interim_article: '',
 	final_article: '',
 	words: {},
+	words_completed: {},
 	num_completed: 1,
 	num_words: 0,
 	$target: null,
@@ -19,6 +21,7 @@ var Mad = {
 		this.$target = $(target);
 		var html = this.$target.html();
 		this.original_article = html;
+		this.interim_article = html;
 		this.display_article = this._getRequiredWords(this.original_article);
 
 		//scrambling
@@ -32,13 +35,17 @@ var Mad = {
 					Mad.$target.html(Mad._scramble(Mad.display_article)).animate({'opacity': 1}, 2000);
 				});
 		}, 4400);
-
-		this.final_article = this._formStepper(this.original_article);
-		if (this.final_article.length) {
-			clearInterval(this.scramble_interval);
-			Mad.$target.html(this.final_article).animate({'opacity': 1}, 2000);
-		}
+		this.finished_interval = setInterval(function(){
+			if (Mad.final_article.length) {
+				clearInterval(Mad.scramble_interval);
+				clearInterval(Mad.finished_interval);
+				Mad.display_article = Mad.final_article;
+				Mad.$target.html(Mad.final_article).animate({'opacity': 1}, 2000);
+			}
+		}, 250);
 		
+		this.interim_article = this._formStepper(this.original_article);
+
 		console.log(this.words);
 	},
 
@@ -57,6 +64,7 @@ var Mad = {
 
 	 		if (typeof(this.words[word_type]) === 'undefined') {
 	 			this.words[word_type] = [null];
+	 			this.words_completed[word_type] = 0;
 	 		} else {
 	 			this.words[word_type].push(null);
 	 		}
@@ -111,50 +119,98 @@ var Mad = {
 		article = article.join(' ');
 		return article;
 	 },
+	 
+	 wordSubmit: function(form) {
+	 	var word_to_your_mother = form.word.value;
+	 	var word_type = $(form.word).attr('word_type');
+	 	
+	 	word_to_your_mother = (word_to_your_mother) ? word_to_your_mother : '&#91;' + word_type + '&#93;';
+	 	
+	 	Mad.words[word_type][Mad.words_completed[word_type]] = word_to_your_mother;
+	 	Mad.words_completed[word_type] += 1;
+		
+		form.word.value = '';
+		
+		if (!Mad.interim_article) {
+			Mad.final_article = Mad._assembleFinalArticle(Mad.original_article);
+		} else if (!Mad.final_article){
+			Mad.interim_article = Mad._formStepper(Mad.interim_article);
+		} else {
+			$('#DialogWordPrompt').dialog('close');
+		}
+	 },
 
 	_formStepper: function(article) {
-		/* Walks the user through each of the words in the Mad Lib */
+		/* Used to walk the user through each of the words in the Mad Lib */
+		
 	 	var start = article.indexOf('['),
 	 		end = article.indexOf(']'),
 	 		word_type;
+	 	
 	 	if (start > -1 && end > -1) {
 	 		word_type = article.substr(start + 1, end - start - 1);
 	 		
-	 		var word_to_your_mother = this._uiLaunchDialog(word_type);
-	 		word_to_your_mother = (word_to_your_mother) ? word_to_your_mother : '&#91;' + word_type + '&#93;';
-			article = article.substr(0, start) + word_to_your_mother + article.substr(end + 1, article.length);
-			
-			return this._formStepper(article);
+			article = article.substr(0, start) + article.substr(end + 1, article.length);
+	 		this._uiLaunchDialog(word_type);
+
+	 	} else {
+	 		return false;
+	 	}
+	 	return article;
+	},
+	
+	_assembleFinalArticle: function(article) {
+	 	var start = article.indexOf('['),
+	 		end = article.indexOf(']'),
+	 		word_type;
+	 		
+	 	if (start > -1 && end > -1) {
+	 		this.num_words += 1;
+	 		word_type = article.substr(start + 1, end - start - 1);
+	 		article = article.substr(0, start) + this.words[word_type][0] + article.substr(end + 1, article.length);
+
+			this.words[word_type].splice(0, 1);
+
+			return this._assembleFinalArticle(article);
 	 	} else {
 	 		return article;
 	 	}
 	},
 	
 	_uiLaunchDialog: function(word_type) {
+		console.log('opening dialog')
 		var result, a_or_an;
 		
 		/* picking the correct indefinite article for the word*/
 		if (['Adjective', 'Adverb', 'Animal'].indexOf(word_type) !== -1) {
-			a_or_an = 'an';
+			a_or_an = ' an ';
 		} else {
-			a_or_an = 'a';
+			a_or_an = ' a ';
 		}
-	
-		var result = prompt('Choose ' 
-							+ a_or_an 
-							+ " " 
-							+ word_type 
-							+ ' (' 
-							+ this.num_completed 
-							+ ' of ' 
-							+ this.num_words 
-							+ ')');
 		
+		$('#DialogWordPrompt > .copy').html('Choose' + a_or_an + word_type);
+		$('#DialogWordPrompt input').attr('word_type', word_type);
+		$('#DialogWordPrompt').dialog("option", "title", '('  + this.num_completed + ' of ' + this.num_words + ')');
+		
+		
+		setTimeout(function(){
+			$('#DialogWordPrompt').dialog('open');
+		}, 0);
+		
+		//var result = prompt('ya');
 		this.num_completed += 1;
-		return result;
 	}
 }
 
 $('.mad-lib').each(function() {
 	Mad.Lib(this);
 });
+
+$('#DialogWordPrompt').dialog({
+	autoOpen: false,
+	modal: true
+});
+
+function openDialog(){
+	$('#DialogWordPrompt').dialog('open');
+}
