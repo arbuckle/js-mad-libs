@@ -7,29 +7,72 @@
 	<style>
 		html, body {height: 100%; margin:0; padding: 0}
 
+		body {
+			font-family: Arial, Helvetica, Sans-serif;
+			background-image: url('img/bg.jpg');
+		}
 		.wrap {
+			background-color: rgba(255, 255, 255, 0.75);
 			margin: 0 auto;
 			height: 100%;
 			width: 960px;
 			border-left: 1px solid black;
 			border-right: 1px solid black;
+			position: relative;
 		}
+
+		.header {
+			padding: 20px;
+			text-align: center;
+			font-family: Verdana;
+			font-style: italic;
+			color: #585848;
+		}
+
+		.header .subtext {
+
+		}
+
+		.header h1 {
+		}
+
+		.img-feature {float:right; margin: 35px 15px;}
 
 		.mad-lib {
 			padding: 20px 15px;
 		}
-		
+
 		.dialog-parent {display:none;}
 
+		.sub-lib {clear:both; text-align:center;}
+
+		.footer {
+			position: absolute;
+			width: 100%;
+			bottom: 0;
+			height: 60px;
+			text-align: center;
+			font-style: italic;
+			font-size: 0.8em;
+		}
+		.footer a {
+			margin: auto;
+			color: black;
+		}
 	</style>
 </head>
 
 <body>
 	<div class="wrap">
+		<div class="header">
+			<h1>Free Al Albertson, Activist and Political Prisoner</h1>
+			<span class="subtext">The Popular Committee for the Defense of Al Albertson</span>
+		</div>
+		<img class="img-feature" src="img/al-1.jpg">
 		<div class="mad-lib">
 			<p>
-			It was a [Adjective] and [Adjective] night on the 6th of May, [Year], when the [City]
-			Police Department SWAT team [Adverb] through the door of Al Albertson's apartment,
+			It was a [Adjective] and [Adjective] night on the 6th of May, [Future Year], when the [City]
+			Police Department SWAT team burst [Adverb] through the door of Al Albertson's apartment,
 			shooting his pet [Animal] dead and terrorizing the [Number] roomates he was
 			living with at the time.
 			</p>
@@ -49,6 +92,11 @@
 			[Number] of years without parole at the [State] State Penitentiary, a supermax
 			facility.
 			</p>
+			<p>
+			Following the arrest of Albertson, a committee was formed under the name "The Popular
+			Committee for the Defense of Al Albertson", which aims at demanding an immediate release
+			for Albertson and defying his victimization by the state for crimes he did not commit.
+			</p>
 		</div>
 		<div id="WordPromptParent" class="dialog-parent">
 			<div id="DialogWordPrompt">
@@ -60,6 +108,18 @@
 					</button>
 				</form>
 			</div>
+		</div>
+
+		<div class="sub-lib">
+			<h2>
+				A peaceful protestor is being held prisoner by an unjust and corrupt government.
+				Help now!
+			</h2>
+			<img src="img/hero.jpg">
+		</div>
+
+		<div class="footer">
+			<a href="http://www.amnesty.org/">To support real political prisoners, support Amnesty International</a>
 		</div>
 	</div>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
